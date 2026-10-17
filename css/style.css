@@ -211,6 +211,7 @@ font-family:var(--font);text-align:start;color:var(--text-main);background:var(-
 .lyPreview .lyP1,.lyPreview .lyP2{background:var(--panel-bg);border:1px solid var(--player-1)}
 .lyPreview .lyP2{border-color:var(--player-2)}
 .lyPreview .lyCtrl{background:var(--btn-main-1);border:1px solid var(--btn-line)}
+.lyPreview.stacked .lyBoard{left:31px;top:5px;width:40px;height:40px}.lyPreview.stacked .lyP1{left:5px;top:5px;width:21px;height:13px}.lyPreview.stacked .lyP2{left:5px;top:22px;width:21px;height:13px}.lyPreview.stacked .lyCtrl{left:5px;top:40px;width:21px;height:12px}
 .lyPreview.side .lyBoard{left:30px;top:5px;width:41px;height:41px}.lyPreview.side .lyP1{left:5px;top:7px;width:20px;height:15px}.lyPreview.side .lyP2{left:5px;top:26px;width:20px;height:15px}.lyPreview.side .lyCtrl{left:5px;top:45px;width:20px;height:7px}
 .lyPreview.arena .lyBoard{left:25px;top:7px;width:27px;height:27px}.lyPreview.arena .lyP1{left:4px;top:9px;width:16px;height:24px}.lyPreview.arena .lyP2{right:4px;top:9px;width:16px;height:24px}.lyPreview.arena .lyCtrl{left:25px;top:39px;width:27px;height:10px}
 .lyPreview.below .lyBoard{left:25px;top:3px;width:27px;height:27px}.lyPreview.below .lyCtrl{left:25px;top:33px;width:27px;height:7px}.lyPreview.below .lyP1{left:12px;top:44px;width:24px;height:9px}.lyPreview.below .lyP2{right:12px;top:44px;width:24px;height:9px}
@@ -253,6 +254,21 @@ html[data-layout="balanced"] .boardWrap,html:not([data-layout]) .boardWrap{grid-
 html[data-layout="balanced"] .board,html:not([data-layout]) .board{width:var(--desk-board)}
 html[data-layout="balanced"] .side,html:not([data-layout]) .side{grid-area:side;display:grid}
 html[data-layout="balanced"] .players,html:not([data-layout]) .players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* Classic stacked: restores the pre-preset desktop hierarchy — player 1 above player 2,
+   then controls underneath, while retaining the newer full-viewport board sizing. */
+html[data-layout="stacked"] .app{
+--stack-gap:clamp(10px,1vw,18px);
+--stack-side:clamp(300px,27vw,420px);
+--stack-board:max(420px,min(calc((100dvh - 60px)*var(--board-scale)),calc(100vw - 16px - var(--stack-gap) - var(--stack-side))));
+width:100%;max-width:none;margin:0;align-items:start;justify-content:stretch;gap:var(--stack-gap);
+grid-template-columns:var(--stack-side) var(--stack-board);grid-template-areas:"side board"
+}
+html[data-layout="stacked"] .boardWrap{grid-area:board}
+html[data-layout="stacked"] .board{width:var(--stack-board);max-width:none}
+html[data-layout="stacked"] .side{grid-area:side;display:grid;align-self:start;grid-template-rows:auto auto auto auto;align-content:start}
+html[data-layout="stacked"] .players{display:grid;grid-template-columns:minmax(0,1fr)}
+html[data-layout="stacked"] .rack{max-width:none}
 
 /* Arena: player panels oppose one another; board and commands form the central axis. */
 html[data-layout="arena"] .app{
