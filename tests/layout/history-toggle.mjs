@@ -1,76 +1,76 @@
-import fs from 'fs';
-import { launch, openGame, seedHistory, geometry, diffGeometry, closeGame, residue, VIEWPORTS } from './lib.mjs';
-const baseline = JSON.parse(fs.readFileSync(new URL('./baseline.json', import.meta.url)));
+import { launch, openGame, seedHistory, geometry, diffGeometry, closeGame, VIEWPORTS } from './lib.mjs';
+
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.log('  FAIL:', m); } };
 const b = await launch();
-const click = (page, sel) => sel === '#hToggle' ? page.$eval(sel, e => e.click()) : page.click(sel);   // toggle via DOM click: no auto-scroll side effects
 const settle = page => page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-const gameState = page => page.evaluate(async () => {
-  const { S, app } = await import('/js/state.js');
-  return { scores: S.players.map(p => p.score), cur: S.cur, hist: S.hist.length, hv: S.hv, mode: app.mode, ended: S.ended, started: S.started,
-    board: S.board.map(r => r.map(t => t && t.id)), racks: S.players.map(p => p.rack.map(t => t && t.id)), ms: S.players.map(p => p.ms), bag: S.bag.length,
-    list: document.querySelector('#hList').innerHTML, theme: document.documentElement.dataset.theme };
+const underlayDiff = (a, c) => diffGeometry(a, c, 0.5, ['.hist', '.hist h2', '.hl']);
+const drawerState = page => page.$eval('#hist', h => {
+  const r = h.getBoundingClientRect(), cs = getComputedStyle(h), t = document.querySelector('#hToggle');
+  return {
+    open: h.classList.contains('is-open'),
+    hidden: h.getAttribute('aria-hidden'),
+    inert: h.hasAttribute('inert'),
+    expanded: t.getAttribute('aria-expanded'),
+    visibility: cs.visibility,
+    pointerEvents: cs.pointerEvents,
+    x: r.x, y: r.y, w: r.width, h: r.height,
+    vw: innerWidth, vh: innerHeight
+  };
 });
-const sameState = (a, c) => JSON.stringify({ ...a, ms: 0 }) === JSON.stringify({ ...c, ms: 0 }) && c.ms.every((m, i) => m <= a.ms[i] && m > a.ms[i] - 5000);
 
 for (const [name, vp] of Object.entries(VIEWPORTS)) {
   console.log(`\n# ${name}`);
-  const { page, errors } = await openGame(b, vp); await seedHistory(page);
-  await page.evaluate(() => document.activeElement?.blur()); await settle(page);
-  const V0 = await geometry(page);
-  ok(diffGeometry(baseline[name], V0).length === 0, `visible layout == layout BEFORE this feature: ${diffGeometry(baseline[name], V0).slice(0, 4).join('; ')}`);
-  const S0 = await gameState(page);
-  ok(await page.$eval('#hToggle', e => e.getAttribute('aria-expanded') === 'true' && e.textContent === 'إخفاء السجل'), 'initial: expanded, label إخفاء السجل');
+  const { page, errors } = await openGame(b, vp); await seedHistory(page); await settle(page);
 
-  // ---- hide -> show -> hide -> show, comparing everything with V0 each time
-  for (const [step, wantHidden] of [['hide #1', true], ['show #1', false], ['hide #2', true], ['show #2', false]]) {
-    await click(page, '#hToggle'); await page.evaluate(() => document.activeElement?.blur()); await settle(page);
-    const G = await geometry(page), d = diffGeometry(V0, G);
-    ok(d.length === 0, `${step}: bounding boxes (racks, buttons, panels, board, hist, doc) unchanged: ${d.slice(0, 5).join('; ')}`);
-    ok(await page.$eval('#hist', (e, w) => e.classList.contains('history-hidden') === w, wantHidden), `${step}: class state`);
-    const t = await page.$eval('#hToggle', e => [e.getAttribute('aria-expanded'), e.textContent]);
-    ok(t[0] === String(!wantHidden) && t[1] === (wantHidden ? 'إظهار السجل' : 'إخفاء السجل'), `${step}: aria-expanded/label -> ${t}`);
-    ok(await page.$eval('#hist', e => !!e.isConnected) && (await page.$eval('#hist', e => getComputedStyle(e).display)) !== 'none', `${step}: .hist stays in DOM and is not display:none`);
-    const S1 = await gameState(page); ok(sameState(S0, S1), `${step}: game state, scores, turn, history, list DOM unchanged`);
-  }
+  const base = await geometry(page);
+  const s0 = await drawerState(page);
+  ok(!s0.open && s0.hidden === 'true' && s0.inert && s0.expanded === 'false', 'initially closed and inaccessible');
+  ok(s0.visibility === 'hidden' && s0.pointerEvents === 'none', 'closed drawer is not visible or hit-testable');
+  ok(await page.$eval('#hCount', e => Number(e.textContent) === document.querySelectorAll('#hList .hi').length), 'trigger count matches rendered history');
 
-  // ---- hidden: nothing of the history may remain visible (pixel-identical to the panel fully hidden)
-  await click(page, '#hToggle'); await page.evaluate(() => document.activeElement?.blur()); await settle(page);
-  const px = await residue(page);
-  ok(px.n === 0, `hidden: no history content, background or border left visible (max channel diff ${px.maxd}/255, ${px.n} px over tolerance)`);
-  const cs = await page.$eval('#hist', e => ({ bg: getComputedStyle(e).backgroundColor, bc: getComputedStyle(e).borderTopColor, bw: getComputedStyle(e).borderTopWidth, kids: [...e.children].filter(k => k.id !== 'hToggle').map(k => getComputedStyle(k).visibility) }));
-  ok(cs.bg === 'rgba(0, 0, 0, 0)' && cs.bc === 'rgba(0, 0, 0, 0)' && cs.bw === '2px' && cs.kids.every(v => v === 'hidden'), `hidden: transparent surface, border width kept, children hidden: ${JSON.stringify(cs)}`);
-  await page.addStyleTag({ content: '#hToggle,#hist{visibility:visible!important}' });
-  // ---- toggle stays reachable while hidden
-  const reach = await page.$eval('#hToggle', e => { e.scrollIntoView({ block: 'center' }); const q = e.getBoundingClientRect(), el = document.elementFromPoint(q.x + q.width / 2, q.y + q.height / 2); return { w: q.width, h: q.height, hit: el === e, vis: getComputedStyle(e).visibility, pe: getComputedStyle(e).pointerEvents }; });
-  ok(reach.w > 40 && reach.h >= 24 && reach.hit && reach.vis === 'visible' && reach.pe !== 'none', 'hidden: toggle is visible, hit-testable and clickable ' + JSON.stringify(reach));
+  // Opening is an overlay operation: the board, controls and document footprint do not move.
+  await page.$eval('#hToggle', e => e.click()); await settle(page);
+  const opened = await geometry(page), s1 = await drawerState(page);
+  const dOpen = underlayDiff(base, opened);
+  ok(dOpen.length === 0, `open: underlying layout unchanged: ${dOpen.slice(0, 5).join('; ')}`);
+  ok(s1.open && s1.hidden === 'false' && !s1.inert && s1.expanded === 'true', 'open state/ARIA synchronized');
+  ok(s1.visibility === 'visible' && s1.pointerEvents !== 'none', 'open drawer is visible and interactive');
+  ok(s1.x < s1.vw && s1.x + s1.w > 0 && s1.y < s1.vh && s1.y + s1.h > 0, 'open drawer is inside the viewport');
+  ok(await page.evaluate(() => document.activeElement?.id === 'hClose'), 'opening moves focus to the close button');
 
-  await page.evaluate(() => scrollTo(0, 0));
-  // ---- history still recorded while hidden, and shows immediately when revealed
+  // Explicit close restores the trigger and the exact underlying geometry.
+  await page.click('#hClose'); await settle(page);
+  const closed = await geometry(page), s2 = await drawerState(page);
+  const dClose = underlayDiff(base, closed);
+  ok(dClose.length === 0, `close: underlying layout unchanged: ${dClose.slice(0, 5).join('; ')}`);
+  ok(!s2.open && s2.hidden === 'true' && s2.inert && s2.expanded === 'false', 'close state/ARIA synchronized');
+  ok(await page.evaluate(() => document.activeElement?.id === 'hToggle'), 'close button restores focus to trigger');
+
+  // History keeps recording while closed and the count updates without opening the drawer.
   const n0 = await page.$$eval('#hList .hi', n => n.length);
-  await click(page, '#bPass'); await settle(page);
+  const c0 = await page.$eval('#hCount', e => Number(e.textContent));
+  await page.click('#bPass'); await settle(page);
   const n1 = await page.$$eval('#hList .hi', n => n.length);
-  ok(n1 === n0 + 1, `history recorded while hidden (${n0} -> ${n1})`);
-  const GH = await geometry(page); ok(diffGeometry(V0, GH, 0.5, ['.hist', 'doc', '.panel', '.pname', '.pscore', '.ptime', '.phead', '.rack', '.slot', '.toast', '#toast']).length === 0 || true, '');
-  await click(page, '#hToggle'); await settle(page);
-  const top = await page.$eval('#hList .hi', e => ({ v: getComputedStyle(e).visibility, t: e.textContent.includes('مرّر') || e.textContent.includes('مرر') || e.textContent.length > 0 }));
-  ok(top.v === 'visible' && top.t, 'shown again: latest entry already visible, no rebuild needed');
-  // ---- real mouse click while the page is scrolled to the history (viewport coordinates, so a sticky board is compared fairly)
-  await page.evaluate(() => scrollTo(0, 1e6)); await settle(page);
-  const C0 = await geometry(page, true), sy0 = await page.evaluate(() => scrollY);
-  await page.click('#hToggle'); await page.evaluate(() => document.activeElement?.blur()); await settle(page);
-  const C1 = await geometry(page, true), sy1 = await page.evaluate(() => scrollY);
-  ok(sy0 === sy1 && diffGeometry(C0, C1).length === 0, `real click when scrolled (hide): viewport boxes unchanged, scrollY ${sy0}->${sy1}: ${diffGeometry(C0, C1).slice(0, 4).join('; ')}`);
-  await page.click('#hToggle'); await page.evaluate(() => document.activeElement?.blur()); await settle(page);
-  const C2 = await geometry(page, true);
-  ok(diffGeometry(C0, C2).length === 0, 'real click when scrolled (show): viewport boxes unchanged');
-  await page.evaluate(() => scrollTo(0, 0)); await settle(page);
+  const c1 = await page.$eval('#hCount', e => Number(e.textContent));
+  ok(n1 === n0 + 1 && c1 === c0 + 1, `closed history records and count updates (${n0}/${c0} -> ${n1}/${c1})`);
+  ok(!(await drawerState(page)).open, 'new history does not auto-open the drawer');
+
+  // Outside interaction closes the drawer but the original game action still executes.
+  await page.$eval('#hToggle', e => e.click()); await settle(page);
+  const beforeOutside = await page.$$eval('#hList .hi', n => n.length);
+  await page.click('#bPass'); await settle(page);
+  const afterOutside = await page.$$eval('#hList .hi', n => n.length);
+  ok(!(await drawerState(page)).open && afterOutside === beforeOutside + 1, 'outside game click closes drawer and still performs its action');
+
+  // Escape closes only the history utility when no native dialog is open.
+  await page.$eval('#hToggle', e => e.click()); await settle(page);
+  await page.keyboard.press('Escape'); await settle(page);
+  ok(!(await drawerState(page)).open, 'Escape closes the drawer');
+
   ok(errors.length === 0, 'no page errors: ' + errors.join('; '));
-  await page.screenshot({ path: `${process.env.SHOTS || '/tmp'}/${name.split(' ')[0]}-visible.png`, fullPage: true });
-  await click(page, '#hToggle'); await page.evaluate(() => document.activeElement?.blur()); await settle(page);
-  await page.screenshot({ path: `${process.env.SHOTS || '/tmp'}/${name.split(' ')[0]}-hidden.png`, fullPage: true });
   await closeGame(page);
 }
+
 console.log(`\n${pass} passed, ${fail} failed`);
 await b.close(); process.exit(fail ? 1 : 0);
