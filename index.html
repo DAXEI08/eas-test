@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Arabic Scrabble — Integrated Version</title>
 <!-- Pre-paint: reuse the saved theme id so there is no flash of the default theme. An unknown id simply matches no theme block, i.e. classic. themes.js validates it again at startup. -->
-<script>try{var t=localStorage.getItem('scrabble.theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{var t=localStorage.getItem('scrabble.theme');if(t)document.documentElement.dataset.theme=t;var u=JSON.parse(localStorage.getItem('scrabble.ui'));if(u&&u.layout)document.documentElement.dataset.layout=u.layout}catch(e){}</script>
 <link rel="stylesheet" href="css/themes.css">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/cover.css">
@@ -52,9 +52,11 @@
 <div class="setPanel">
 <h3 class="setH">المظهر</h3>
 <div class="thGrid" id="thB" role="group" aria-label="المظهر"></div>
-<h3 class="setH">الأبعاد</h3>
+<h3 class="setH">تخطيط الواجهة</h3>
+<div class="layoutGrid" id="lyB" role="radiogroup" aria-label="تخطيط الواجهة"></div>
+<h3 class="setH">الحجم والمسافات</h3>
 <div class="dimList" id="dmB"></div>
-<button class="btn" id="dmReset" type="button">إعادة ضبط الأبعاد</button>
+<div class="setActions"><button class="btn" id="dmReset" type="button">إعادة ضبط التخصيص</button></div>
 <form method="dialog"><button class="btn" value="">إغلاق</button></form>
 </div>
 </dialog>
