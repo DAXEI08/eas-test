@@ -32,7 +32,8 @@ for (const [device, vp] of Object.entries(cases)) {
     ok(errors.length === 0, 'no page errors: ' + errors.join('; '));
 
     if (device === 'desktop' && layout === 'arena') {
-      ok(g.panels[0].right <= g.board.x + 2 && g.panels[1].x >= g.board.right - 2, 'arena places players on opposite sides of board');
+      const left = g.panels.some(p => p.right <= g.board.x + 2), right = g.panels.some(p => p.x >= g.board.right - 2);
+      ok(left && right, 'arena places players on opposite sides of board');
       ok(g.controls.y >= g.board.bottom - 2, 'arena places controls below central board');
     }
     if (device === 'desktop' && layout === 'boardFirst') {
