@@ -15,8 +15,8 @@ export const DIM_LIMITS = {
   buttonGap:          [0,   24,  1,    6],  // gap between control buttons, px (no slider)
   controlColumns:     [1,   6,   1,    3],  // control buttons per row (no slider)
   historyScale:       [0.6, 1.6, 0.05, 1],  // history text size multiplier
-  historyHeightScale: [0.4, 1.6, 0.05, 1],  // history log height multiplier (capped at board height on desktop)
-  historyWidthScale:  [0.6, 1.6, 0.05, 1]   // history column width multiplier, desktop and landscape layouts
+  historyHeightScale: [0.4, 1.6, 0.05, 1],  // history drawer height multiplier
+  historyWidthScale:  [0.6, 1.6, 0.05, 1]   // history drawer width multiplier on non-phone layouts
 };
 export const DIMENSIONS = Object.fromEntries(Object.entries(DIM_LIMITS).map(([k, l]) => [k, l[3]]));
 
