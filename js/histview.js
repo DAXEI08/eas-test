@@ -1,29 +1,50 @@
-// Show/hide toggle for the word history (سجل الكلمات). A view preference only, like the theme: it never touches game state.
-// Hiding adds the `history-hidden` class to the existing .hist element. The element is never removed, never display:none and
-// its grid area is untouched, so its footprint (and therefore every other element's position) cannot change. Only its
-// contents and surface become invisible (see css/style.css). History keeps being recorded and rendered while hidden.
+// Optional word-history drawer (سجل الكلمات). This is view-only UI: history recording remains in game state.
+// The drawer starts closed on every page load, never reserves layout space, and can be dismissed with Escape
+// or by interacting elsewhere in the app. It deliberately does not pause or otherwise mutate the game.
 import { $ } from './state.js';
 
-const KEY = 'scrabble.historyVisible';
-const LABEL = { hide: 'إخفاء السجل', show: 'إظهار السجل' };
-
-// Default visible. Only an explicit saved 'false' hides it; a missing, invalid or unreadable value means visible.
-export function loadHistoryVisible() {
-  try { return localStorage.getItem(KEY) !== 'false'; } catch { return true; }
+export function isHistoryOpen() {
+  return $('#hist').classList.contains('is-open');
 }
-const save = v => { try { localStorage.setItem(KEY, String(v)); } catch { /* storage unavailable */ } };
 
-export function isHistoryVisible() { return !$('#hist').classList.contains('history-hidden'); }
+export function setHistoryOpen(open, focus = true) {
+  const hist = $('#hist');
+  const toggle = $('#hToggle');
 
-export function setHistoryVisible(visible, persist = true) {
-  $('#hist').classList.toggle('history-hidden', !visible);
-  const b = $('#hToggle');
-  b.setAttribute('aria-expanded', String(visible));
-  b.textContent = visible ? LABEL.hide : LABEL.show;
-  if (persist) save(visible);
+  hist.classList.toggle('is-open', open);
+  hist.setAttribute('aria-hidden', String(!open));
+  hist.toggleAttribute('inert', !open);
+  toggle.setAttribute('aria-expanded', String(open));
+
+  if (!focus) return;
+
+  if (open) {
+    requestAnimationFrame(() => $('#hClose').focus());
+  } else if (hist.contains(document.activeElement)) {
+    toggle.focus();
+  }
 }
 
 export function initHistoryToggle() {
-  setHistoryVisible(loadHistoryVisible(), false);
-  $('#hToggle').addEventListener('click', () => setHistoryVisible(!isHistoryVisible()));
+  const hist = $('#hist');
+  const toggle = $('#hToggle');
+
+  setHistoryOpen(false, false);
+
+  toggle.addEventListener('click', () => setHistoryOpen(!isHistoryOpen()));
+  $('#hClose').addEventListener('click', () => setHistoryOpen(false));
+
+  // Escape belongs to an open native dialog first. Otherwise it closes this secondary drawer.
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || !isHistoryOpen() || document.querySelector('dialog[open]')) return;
+    e.preventDefault();
+    setHistoryOpen(false);
+  });
+
+  // The history is a lightweight utility, not a modal. Clicking elsewhere closes it but leaves
+  // the original pointer interaction intact, so the game still feels immediate.
+  document.addEventListener('pointerdown', e => {
+    if (!isHistoryOpen() || hist.contains(e.target) || toggle.contains(e.target)) return;
+    setHistoryOpen(false);
+  });
 }

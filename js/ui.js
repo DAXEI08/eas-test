@@ -124,6 +124,9 @@ function renderHist() {
     .flatMap(e => e.words.map(w => ({...w, p: e.p}))).reduce((b, w) => !b || w.pts > b.pts ? w : b, null);
   $('#hList').innerHTML = S.hist.length ? S.hist.map(histItem).reverse().join('') : '<li class="hempty">لم تُسجَّل أي حركة بعد.</li>';
   $('#hBest').textContent = best ? `أعلى كلمة: ${best.w} (${best.pts} نقطة — ${NAMES[best.p]})` : '';
+  const count = $('#hCount');
+  count.textContent = S.hist.length;
+  count.setAttribute('aria-label', `عدد الحركات: ${S.hist.length}`);
 }
 export function render() {
   if (S.pick && !(cur().rack.includes(S.pick) || inMove(S.pick))) S.pick = null;
