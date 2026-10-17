@@ -126,15 +126,21 @@ button,input,textarea,select{font-family:inherit}
 .vrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 /* The grid areas below keep an empty "head" row on purpose: the title lives on the cover, and removing the row would shift the layouts. */
 @media(max-width:420px){body{font-size:16px;padding-inline:4px;overflow-x:hidden}.app{gap:8px}.boardWrap{width:100%}.board{width:min(100%,calc(100vw - 8px))}.side{gap:8px}.ctrls .btn{min-height:calc(44px*var(--btn-scale))}}
-/* Desktop / 16:9: players+controls beside the board; history is an overlay drawer. */
+/* Desktop: fill the usable viewport. The square board is height-led; the side column absorbs every
+   remaining horizontal pixel instead of leaving a fixed-width cluster floating in the centre. */
 @media(min-width:1000px) and (min-height:560px){
-.app{--A:min(calc(100vw - 16px),1280px);--sw:clamp(270px,28vw,370px);
---bs:max(340px,min(calc((100dvh - 125px)*var(--board-scale)),calc(var(--A) - 10px - var(--sw)),calc(880px*var(--board-scale))));
-max-width:1280px;align-items:start;justify-content:center;
-grid-template-columns:minmax(270px,var(--sw)) var(--bs);grid-template-areas:"head head" "side board"}
-.boardWrap{grid-area:board}.side{grid-area:side}
-.board{width:var(--bs);max-width:none}
-.players{grid-template-columns:minmax(0,1fr)}
+.app{
+--desk-gap:clamp(10px,1vw,18px);
+--desk-board:max(420px,min(calc((100dvh - 60px)*var(--board-scale)),calc(100vw - 16px - var(--desk-gap) - 360px)));
+width:100%;max-width:none;margin:0;
+align-items:start;justify-content:stretch;gap:var(--desk-gap);
+grid-template-columns:minmax(340px,1fr) var(--desk-board);grid-template-areas:"side board"
+}
+.boardWrap{grid-area:board;min-width:0}
+.board{width:var(--desk-board);max-width:none}
+.side{grid-area:side;align-self:stretch;min-height:min(calc(100dvh - 16px),var(--desk-board));grid-template-rows:auto auto auto;align-content:start}
+.players{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rack{max-width:none}
 }
 /* Tilted phones / short or narrow landscape screens: the board stays pinned at full height with players + buttons beside it. */
 @media(orientation:landscape) and (max-width:999px),(orientation:landscape) and (max-height:559px){
