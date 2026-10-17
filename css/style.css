@@ -14,7 +14,7 @@
  unicode-range:U+0000-05FF,U+2000-206F,U+20A0-20CF}
 :root{--font:'ScrabbleMix',serif;
 /* Layout dimensions (set from DIM_LIMITS in js/config.js by js/dims.js) */
---board-scale:1;--rack-scale:1;--btn-scale:1;--btn-gap:6px;--ctrl-cols:3;--hist-scale:1;--hist-hs:1;--hist-w:1}
+--board-scale:1;--rack-scale:1;--tile-scale:1;--btn-scale:1;--btn-gap:6px;--ctrl-cols:3;--hist-scale:1;--hist-hs:1;--hist-w:1}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
 body{font-family:var(--font);color:var(--text-main);min-height:100dvh;padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));
@@ -74,10 +74,11 @@ background:linear-gradient(var(--btn-1),var(--btn-2));box-shadow:inset 0 1px 0 #
 .ptime{font:700 1.15rem var(--font);font-variant-numeric:tabular-nums;direction:ltr;opacity:.75}
 .panel.on .ptime{opacity:1}.ptime.wait{opacity:.45}.ptime.low{color:var(--time-low)}.ptime.crit{color:var(--time-crit);animation:pulse 1s infinite}.ptime.out{animation:none}
 @keyframes pulse{50%{opacity:.45}}
-.rack{container-type:inline-size;--lf:8.6cqw;--vf:3.2cqw;width:calc(100%*var(--rack-scale));max-width:440px;margin-inline:auto;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:min(1.2cqw,5.28px);padding:min(1.8cqw,7.92px);border-radius:10px;transition:opacity .3s;
-background:linear-gradient(var(--rack-1),var(--rack-2));box-shadow:inset 0 2px 8px #000a}
+.rack{container-type:inline-size;--lf:8.6cqw;--vf:3.2cqw;position:relative;isolation:isolate;width:100%;max-width:440px;margin-inline:auto;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:min(1.2cqw,5.28px);padding:min(1.8cqw,7.92px);border-radius:10px;transition:opacity .3s}
+.rack::before{content:"";position:absolute;z-index:-1;inset-block:0;left:50%;width:100%;border-radius:10px;transform:translateX(-50%) scaleX(var(--rack-scale));transform-origin:center;
+background:linear-gradient(var(--rack-1),var(--rack-2));box-shadow:inset 0 2px 8px #000a;transition:transform .2s ease}
 .panel:not(.on) .rack{opacity:.6}
-.slot{position:relative;aspect-ratio:1;border-radius:10%;background:var(--slot-bg);box-shadow:inset 0 1px 4px #0008;min-width:0}
+.slot{position:relative;aspect-ratio:1;border-radius:10%;background:var(--slot-bg);box-shadow:inset 0 1px 4px #0008;min-width:0;transform:scale(var(--tile-scale));transform-origin:center;transition:transform .15s ease}
 /* history: optional off-canvas utility; it never participates in the app grid */
 .histAccess{display:flex;justify-content:flex-start}
 .histToggle{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:4px 11px;border-radius:999px;cursor:pointer;
