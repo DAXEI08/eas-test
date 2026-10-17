@@ -8,6 +8,11 @@ export const TOAST_MS = 4000, TICK_MS = 250;
 
 export const DEFAULT_LAYOUT = 'balanced';
 export const LAYOUT_PRESETS = {
+  stacked: {
+    labelAr: 'كلاسيكي عمودي', labelEn: 'Classic stacked',
+    descAr: 'التخطيط القديم: رفّ اللاعب الأول فوق رفّ اللاعب الثاني، والأزرار أسفلهما.',
+    preview: 'stacked'
+  },
   balanced: {
     labelAr: 'متوازن', labelEn: 'Balanced',
     descAr: 'اللوح كبير، واللاعبان والأزرار في عمود جانبي مرن.',
