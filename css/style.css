@@ -14,7 +14,7 @@
  unicode-range:U+0000-05FF,U+2000-206F,U+20A0-20CF}
 :root{--font:'ScrabbleMix',serif;
 /* Layout dimensions (set from DIM_LIMITS in js/config.js by js/dims.js) */
---board-scale:1;--rack-scale:1;--tile-scale:1;--btn-scale:1;--btn-gap:6px;--ctrl-cols:3;--hist-scale:1;--hist-hs:1;--hist-w:1}
+--board-scale:1;--rack-scale:1;--btn-scale:1;--btn-gap:6px;--ctrl-cols:3;--hist-scale:1;--hist-hs:1;--hist-w:1}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
 body{font-family:var(--font);color:var(--text-main);min-height:100dvh;padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));
@@ -74,30 +74,23 @@ background:linear-gradient(var(--btn-1),var(--btn-2));box-shadow:inset 0 1px 0 #
 .ptime{font:700 1.15rem var(--font);font-variant-numeric:tabular-nums;direction:ltr;opacity:.75}
 .panel.on .ptime{opacity:1}.ptime.wait{opacity:.45}.ptime.low{color:var(--time-low)}.ptime.crit{color:var(--time-crit);animation:pulse 1s infinite}.ptime.out{animation:none}
 @keyframes pulse{50%{opacity:.45}}
-.rack{container-type:inline-size;--lf:8.6cqw;--vf:3.2cqw;position:relative;isolation:isolate;width:100%;max-width:440px;margin-inline:auto;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:min(1.2cqw,5.28px);padding:min(1.8cqw,7.92px);border-radius:10px;transition:opacity .3s}
-.rack::before{content:"";position:absolute;z-index:-1;inset-block:0;left:50%;width:100%;border-radius:10px;transform:translateX(-50%) scaleX(var(--rack-scale));transform-origin:center;
-background:linear-gradient(var(--rack-1),var(--rack-2));box-shadow:inset 0 2px 8px #000a;transition:transform .2s ease}
+.rack{container-type:inline-size;--lf:8.6cqw;--vf:3.2cqw;width:calc(100%*var(--rack-scale));max-width:440px;margin-inline:auto;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:min(1.2cqw,5.28px);padding:min(1.8cqw,7.92px);border-radius:10px;transition:opacity .3s;
+background:linear-gradient(var(--rack-1),var(--rack-2));box-shadow:inset 0 2px 8px #000a}
 .panel:not(.on) .rack{opacity:.6}
-.slot{position:relative;aspect-ratio:1;border-radius:10%;background:var(--slot-bg);box-shadow:inset 0 1px 4px #0008;min-width:0;transform:scale(var(--tile-scale));transform-origin:center;transition:transform .15s ease}
-/* history: optional off-canvas utility; it never participates in the app grid */
-.histAccess{display:flex;justify-content:flex-start}
-.histToggle{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:4px 11px;border-radius:999px;cursor:pointer;
-font:700 .88rem var(--font);color:var(--btn-text);background:linear-gradient(var(--btn-1),var(--btn-2));border:1px solid var(--btn-line);box-shadow:inset 0 1px 0 #fff3,0 1px 3px #0006}
+.slot{position:relative;aspect-ratio:1;border-radius:10%;background:var(--slot-bg);box-shadow:inset 0 1px 4px #0008;min-width:0}
+/* history */
+.hist{display:flex;flex-direction:column;height:min(calc(360px*var(--hist-hs)),calc(60dvh*var(--hist-hs)));padding:8px 10px;border-radius:12px;background:var(--panel-bg);border:2px solid var(--panel-line);min-width:0;transition:border-color .2s ease,color .2s ease}
+.hist h2{margin:0 0 8px;font-size:calc(1.5rem*var(--hist-scale));color:var(--accent-text);padding-inline-end:4.2rem;min-height:22px}   /* room for the toggle, which sits over the corner */
+/* History toggle. The button is absolutely positioned inside .hist (out of flow), so it never affects layout.
+   Hidden state: the .hist box keeps its exact size, grid area and border width; only its surface and contents become invisible. */
+.hist{position:relative}
+.histToggle{position:absolute;top:6px;inset-inline-end:6px;z-index:1;width:4rem;min-height:24px;padding:1px 0;border-radius:999px;cursor:pointer;text-align:center;
+font:700 .72rem var(--font);color:var(--btn-text);background:linear-gradient(var(--btn-1),var(--btn-2));border:1px solid var(--btn-line);box-shadow:inset 0 1px 0 #fff3,0 1px 3px #0006}
 .histToggle:hover{filter:brightness(1.15)}
-.histToggle:focus-visible,.histClose:focus-visible{outline:3px solid var(--focus);outline-offset:1px;box-shadow:0 0 0 5px var(--focus-halo)}
-.histCount{display:grid;place-items:center;min-width:1.65em;height:1.65em;padding-inline:.35em;border-radius:999px;background:var(--surface-inset);border:1px solid var(--panel-line);font-size:.82em;line-height:1}
-
-.hist{position:fixed;z-index:40;top:max(8px,env(safe-area-inset-top));bottom:max(8px,env(safe-area-inset-bottom));inset-inline-start:max(8px,env(safe-area-inset-right));
-width:min(calc(340px*var(--hist-w)),calc(100vw - 16px));max-width:none;height:auto;margin:0;padding:0;border:0;background:transparent;pointer-events:none;
-transform:translateX(110%);opacity:0;visibility:hidden;transition:transform .22s ease,opacity .18s ease,visibility 0s linear .22s}
-.hist.is-open{transform:translateX(0);opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
-.histPanel{display:flex;flex-direction:column;width:100%;height:min(calc(100%*min(1,var(--hist-hs))),calc(680px*var(--hist-hs)));max-height:100%;margin-inline-start:auto;
-padding:10px;border-radius:14px;background:var(--panel-bg);border:2px solid var(--panel-line);box-shadow:0 16px 40px #0009;color:var(--text-main);overflow:hidden}
-.histHead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.histHead h2{margin:0;font-size:calc(1.35rem*var(--hist-scale));color:var(--accent-text);flex:1}
-.histClose{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:999px;cursor:pointer;font:700 1.35rem/1 var(--font);
-color:var(--btn-text);background:linear-gradient(var(--btn-1),var(--btn-2));border:1px solid var(--btn-line);box-shadow:inset 0 1px 0 #fff3,0 1px 3px #0006}
-.histClose:hover{filter:brightness(1.15)}
+.histToggle:focus-visible{outline:3px solid var(--focus);outline-offset:1px;box-shadow:0 0 0 5px var(--focus-halo)}
+.hist.history-hidden{background:transparent;border-color:transparent;pointer-events:none}
+.hist.history-hidden>:not(.histToggle){visibility:hidden}
+.hist.history-hidden .histToggle{pointer-events:auto}
 .hl{flex:1;min-height:0;overflow:auto;list-style:none;margin:0;padding:0;display:grid;gap:6px;align-content:start;overscroll-behavior:contain}
 .hi{padding:6px 8px;border-radius:8px;background:var(--surface-inset);border-inline-start:4px solid var(--player-1);font-size:calc(1.2rem*var(--hist-scale));line-height:1.5}
 .hi.p1{border-color:var(--player-2)}.hi.void{opacity:.75}.hi.void .chip{text-decoration:line-through}
@@ -108,11 +101,6 @@ color:var(--btn-text);background:linear-gradient(var(--btn-1),var(--btn-2));bord
 .hj{margin-top:6px;font-size:calc(1rem*var(--hist-scale))}.hj.ok{color:var(--verdict-ok)}.hj.void{color:var(--verdict-bad)}
 .hempty{opacity:.75;text-align:center;padding:12px;font-size:calc(1.1rem*var(--hist-scale))}
 .hbest{margin:8px 0 0;font-size:calc(1.1rem*var(--hist-scale));min-height:1.2em}
-@media(max-width:719px) and (orientation:portrait){
-.hist{top:auto;bottom:0;inset-inline:0;width:auto;height:min(calc(62dvh*var(--hist-hs)),620px);transform:translateY(105%);padding-inline:max(4px,env(safe-area-inset-left)) max(4px,env(safe-area-inset-right))}
-.hist.is-open{transform:translateY(0)}
-.histPanel{height:100%;border-radius:16px 16px 0 0;padding-bottom:max(10px,env(safe-area-inset-bottom))}
-}
 dialog{border:2px solid var(--dialog-line);border-radius:14px;background:var(--dialog-bg);color:var(--text-main);padding:18px;width:min(92vw,420px);font-family:var(--font);transition:background-color .2s ease,color .2s ease,border-color .2s ease}
 dialog[open]{animation:dlg .25s ease-out}dialog::backdrop{background:var(--backdrop)}
 @keyframes dlg{from{opacity:0;transform:translateY(12px) scale(.96)}}
@@ -127,45 +115,46 @@ button,input,textarea,select{font-family:inherit}
 .vrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 /* The grid areas below keep an empty "head" row on purpose: the title lives on the cover, and removing the row would shift the layouts. */
 @media(max-width:420px){body{font-size:16px;padding-inline:4px;overflow-x:hidden}.app{gap:8px}.boardWrap{width:100%}.board{width:min(100%,calc(100vw - 8px))}.side{gap:8px}.ctrls .btn{min-height:calc(44px*var(--btn-scale))}}
-/* Desktop: fill the usable viewport. The square board is height-led; the side column absorbs every
-   remaining horizontal pixel instead of leaving a fixed-width cluster floating in the centre. */
+/* Desktop / 16:9: history | board | players+buttons in one screen (phones and portrait tablets keep the single column above) */
 @media(min-width:1000px) and (min-height:560px){
-.app{
---desk-gap:clamp(10px,1vw,18px);
---desk-board:max(420px,min(calc((100dvh - 60px)*var(--board-scale)),calc(100vw - 16px - var(--desk-gap) - 360px)));
-width:100%;max-width:none;margin:0;
-align-items:start;justify-content:stretch;gap:var(--desk-gap);
-grid-template-columns:minmax(340px,1fr) var(--desk-board);grid-template-areas:"side board"
+.app{--A:min(calc(100vw - 16px),1600px);--bo:max(340px,min(calc((100dvh - 125px)*var(--board-scale)),calc(100vw - 640px),calc(880px*var(--board-scale))));
+--sw:calc((var(--A) - 20px - var(--bo))/2);--hw:max(230px,calc(var(--sw)*.78*var(--hist-w)));
+--bs:max(340px,min(calc((100dvh - 125px)*var(--board-scale)),calc(var(--A) - 20px - var(--sw) - var(--hw)),calc(880px*var(--board-scale))));
+max-width:1600px;align-items:start;justify-content:center;
+grid-template-columns:var(--sw) var(--bs) var(--hw);grid-template-areas:"head head head" "side board hist"}
+.boardWrap{grid-area:board}.side{grid-area:side}
+.board{width:var(--bs);max-width:none}
+.players{grid-template-columns:minmax(0,1fr)}
+.hist{grid-area:hist;height:calc(100%*min(1,var(--hist-hs)));align-self:start;contain:size}
 }
-.boardWrap{grid-area:board;min-width:0}
-.board{width:var(--desk-board);max-width:none}
-.side{grid-area:side;align-self:stretch;min-height:min(calc(100dvh - 16px),var(--desk-board));grid-template-rows:auto auto auto;align-content:start}
-.players{grid-template-columns:repeat(2,minmax(0,1fr))}
-.rack{max-width:none}
-}
-/* Tilted phones / short or narrow landscape screens: the board stays pinned at full height with players + buttons beside it. */
+/* Tilted phones / short or narrow landscape screens: the board stays pinned on the left at full height, players + buttons sit beside it and the history follows below. */
 @media(orientation:landscape) and (max-width:999px),(orientation:landscape) and (max-height:559px){
 body{padding-inline:max(8px,env(safe-area-inset-left)) max(8px,env(safe-area-inset-right))}
 .app{--lb:max(220px,min(calc((100dvh - 60px)*var(--board-scale)),calc(100vw - 386px),calc(880px*var(--board-scale))));max-width:none;align-items:start;column-gap:10px;
-grid-template-columns:minmax(0,1fr) var(--lb);grid-template-areas:"head board" "side board"}
+grid-template-columns:minmax(0,1fr) var(--lb);grid-template-areas:"head board" "side board" "hist board"}
 .boardWrap{grid-area:board;position:sticky;top:max(8px,env(safe-area-inset-top))}
 .board{width:var(--lb);max-width:none}
 .side{grid-area:side;gap:8px}#toast{min-height:2rem}
 .players{grid-template-columns:minmax(0,1fr)}
 .btn{min-height:calc(40px*var(--btn-scale))}
+.hist{grid-area:hist}
 #bd{width:min(92vw,560px)}#bf{grid-template-columns:repeat(10,1fr)}#bf .btn{min-height:40px}
 }
 @media(orientation:landscape) and (min-width:830px) and (max-width:999px),(orientation:landscape) and (min-width:830px) and (max-height:559px){.players{grid-template-columns:repeat(2,minmax(0,1fr))}}
-/* Phones turned sideways (landscape, short): controls beside the board; history stays off-canvas. */
+/* Phones turned sideways (landscape, short): players + buttons on the right | board in the middle | smaller history on the left. Narrower landscape screens keep the two-column layout above. */
 @media(orientation:landscape) and (max-height:559px) and (min-width:720px){
 body{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(4px,env(safe-area-inset-bottom))}
-.app{--sw:clamp(212px,29vw,320px);justify-content:center;
---lb:max(220px,min(calc((100dvh - 30px - max(0px,env(safe-area-inset-top) - 4px) - max(0px,env(safe-area-inset-bottom) - 4px))*var(--board-scale)),calc(100vw - 20px - max(8px,env(safe-area-inset-left)) - max(8px,env(safe-area-inset-right)) - var(--sw)),calc(880px*var(--board-scale))));
-grid-template-columns:minmax(0,var(--sw)) var(--lb);grid-template-rows:minmax(0,1fr);grid-template-areas:"side board"}
+.app{--sw:clamp(212px,27vw,300px);--hw:calc(clamp(150px,22vw,260px)*var(--hist-w));justify-content:center;
+--lb:max(220px,min(calc((100dvh - 30px - max(0px,env(safe-area-inset-top) - 4px) - max(0px,env(safe-area-inset-bottom) - 4px))*var(--board-scale)),calc(100vw - 20px - max(8px,env(safe-area-inset-left)) - max(8px,env(safe-area-inset-right)) - var(--sw) - var(--hw)),calc(880px*var(--board-scale))));
+grid-template-columns:minmax(0,var(--sw)) var(--lb) minmax(0,var(--hw));grid-template-rows:auto minmax(0,1fr);
+grid-template-areas:"side board head" "side board hist"}
 .boardWrap{top:max(4px,env(safe-area-inset-top))}
 .bag{margin-top:2px;font-size:.9rem;line-height:1.3;min-height:0}
 .side{align-self:stretch;grid-template-rows:auto auto minmax(0,1fr)}.ctrls{align-self:end}
 .players{grid-template-columns:minmax(0,1fr)}
+.hist{height:calc(100%*min(1,var(--hist-hs)));align-self:start;contain:size;padding:6px 8px}
+.hist h2{font-size:calc(1.2rem*var(--hist-scale));margin-bottom:6px}
+.hi{font-size:calc(1rem*var(--hist-scale));padding:4px 6px}.hh .hp{font-size:calc(1.2rem*var(--hist-scale))}.hh{gap:6px}
 }
 /* Phones turned sideways: smaller racks, clocks and control buttons (both landscape layouts) */
 @media(orientation:landscape) and (max-height:559px){
@@ -197,138 +186,4 @@ background:var(--dialog-bg);color:var(--text-main);border:2px solid var(--dialog
 .thOpt[aria-pressed="true"]{outline:3px solid #000;outline-offset:2px;box-shadow:0 0 0 7px #fff}
 .thOpt[aria-pressed="true"]::after{content:"✓";position:absolute;top:6px;inset-inline-end:10px;font-size:1.1rem;line-height:1}
 .thOpt:focus-visible{outline:3px dashed #000;outline-offset:2px;box-shadow:0 0 0 7px #fff}
-
-/* Layout preset selector */
-.layoutGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.lyOpt{position:relative;display:grid;grid-template-columns:76px minmax(0,1fr);gap:9px;align-items:center;min-height:92px;padding:9px;border-radius:11px;cursor:pointer;
-font-family:var(--font);text-align:start;color:var(--text-main);background:var(--surface-inset);border:2px solid var(--panel-line)}
-.lyOpt[aria-checked="true"]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
-.lyOpt[aria-checked="true"]::after{content:"✓";position:absolute;top:5px;inset-inline-end:8px;color:var(--accent-text);font-weight:700}
-.lyOpt:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.lyCopy{display:grid;line-height:1.25}.lyCopy b{font-size:.98rem}.lyCopy small{direction:ltr;text-align:start;opacity:.72}.lyCopy em{margin-top:3px;font-size:.76rem;font-style:normal;font-weight:400;line-height:1.35;opacity:.82}
-.lyPreview{position:relative;display:block;width:76px;height:58px;border-radius:7px;background:var(--dialog-bg);border:1px solid var(--dialog-line);direction:ltr}
-.lyPreview i{position:absolute;display:block;border-radius:3px}
-.lyPreview .lyBoard{background:var(--board-1);border:1px solid var(--board-line)}
-.lyPreview .lyP1,.lyPreview .lyP2{background:var(--panel-bg);border:1px solid var(--player-1)}
-.lyPreview .lyP2{border-color:var(--player-2)}
-.lyPreview .lyCtrl{background:var(--btn-main-1);border:1px solid var(--btn-line)}
-.lyPreview.stacked .lyBoard{left:31px;top:5px;width:40px;height:40px}.lyPreview.stacked .lyP1{left:5px;top:5px;width:21px;height:13px}.lyPreview.stacked .lyP2{left:5px;top:22px;width:21px;height:13px}.lyPreview.stacked .lyCtrl{left:5px;top:40px;width:21px;height:12px}
-.lyPreview.side .lyBoard{left:30px;top:5px;width:41px;height:41px}.lyPreview.side .lyP1{left:5px;top:7px;width:20px;height:15px}.lyPreview.side .lyP2{left:5px;top:26px;width:20px;height:15px}.lyPreview.side .lyCtrl{left:5px;top:45px;width:20px;height:7px}
-.lyPreview.arena .lyBoard{left:25px;top:7px;width:27px;height:27px}.lyPreview.arena .lyP1{left:4px;top:9px;width:16px;height:24px}.lyPreview.arena .lyP2{right:4px;top:9px;width:16px;height:24px}.lyPreview.arena .lyCtrl{left:25px;top:39px;width:27px;height:10px}
-.lyPreview.below .lyBoard{left:25px;top:3px;width:27px;height:27px}.lyPreview.below .lyCtrl{left:25px;top:33px;width:27px;height:7px}.lyPreview.below .lyP1{left:12px;top:44px;width:24px;height:9px}.lyPreview.below .lyP2{right:12px;top:44px;width:24px;height:9px}
-.lyPreview.table .lyBoard{left:17px;top:17px;width:34px;height:25px}.lyPreview.table .lyP1{left:17px;top:4px;width:34px;height:9px}.lyPreview.table .lyP2{left:17px;bottom:3px;width:34px;height:9px}.lyPreview.table .lyCtrl{right:4px;top:10px;width:10px;height:38px}
-.setActions{display:grid}
-
-/* Mobile preset behavior: presets preserve their intent but collapse to touch-friendly one-column flows. */
-@media(max-width:999px){
-html[data-layout="arena"] .side .ctrls,
-html[data-layout="boardFirst"] .side .ctrls{order:2}
-html[data-layout="arena"] .side .players,
-html[data-layout="boardFirst"] .side .players{order:3}
-html[data-layout="arena"] .side #toast,
-html[data-layout="boardFirst"] .side #toast{order:1}
-html[data-layout="arena"] .side .histAccess,
-html[data-layout="boardFirst"] .side .histAccess{order:4}
-}
-@media(max-width:719px) and (orientation:portrait){
-html[data-layout="tabletop"] .app{grid-template-columns:minmax(0,1fr);grid-template-areas:"toast" "p1" "board" "ctrls" "p2" "utility"}
-html[data-layout="tabletop"] .side,html[data-layout="tabletop"] .players{display:contents}
-html[data-layout="tabletop"] #toast{grid-area:toast}
-html[data-layout="tabletop"] #pn0{grid-area:p1}
-html[data-layout="tabletop"] .boardWrap{grid-area:board}
-html[data-layout="tabletop"] .ctrls{grid-area:ctrls}
-html[data-layout="tabletop"] #pn1{grid-area:p2}
-html[data-layout="tabletop"] .histAccess{grid-area:utility}
-}
-
-/* Desktop preset engine. Balanced keeps wrappers intact. The other presets flatten only presentational
-   wrappers, allowing the same live board/racks/buttons to be rearranged without cloning DOM or state. */
-@media(min-width:1000px) and (min-height:560px){
-html[data-layout="balanced"] .app,
-html:not([data-layout]) .app{
---desk-gap:clamp(10px,1vw,18px);
---desk-board:max(420px,min(calc((100dvh - 60px)*var(--board-scale)),calc(100vw - 16px - var(--desk-gap) - 360px)));
-width:100%;max-width:none;margin:0;align-items:start;justify-content:stretch;gap:var(--desk-gap);
-grid-template-columns:minmax(340px,1fr) var(--desk-board);grid-template-areas:"side board"
-}
-html[data-layout="balanced"] .boardWrap,html:not([data-layout]) .boardWrap{grid-area:board}
-html[data-layout="balanced"] .board,html:not([data-layout]) .board{width:var(--desk-board)}
-html[data-layout="balanced"] .side,html:not([data-layout]) .side{grid-area:side;display:grid}
-html[data-layout="balanced"] .players,html:not([data-layout]) .players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
-
-/* Classic stacked: restores the pre-preset desktop hierarchy — player 1 above player 2,
-   then controls underneath, while retaining the newer full-viewport board sizing. */
-html[data-layout="stacked"] .app{
---stack-gap:clamp(10px,1vw,18px);
---stack-side:clamp(300px,27vw,420px);
---stack-board:max(420px,min(calc((100dvh - 60px)*var(--board-scale)),calc(100vw - 16px - var(--stack-gap) - var(--stack-side))));
-width:100%;max-width:none;margin:0;align-items:start;justify-content:stretch;gap:var(--stack-gap);
-grid-template-columns:var(--stack-side) var(--stack-board);grid-template-areas:"side board"
-}
-html[data-layout="stacked"] .boardWrap{grid-area:board}
-html[data-layout="stacked"] .board{width:var(--stack-board);max-width:none}
-html[data-layout="stacked"] .side{grid-area:side;display:grid;align-self:start;grid-template-rows:auto auto auto auto;align-content:start}
-html[data-layout="stacked"] .players{display:grid;grid-template-columns:minmax(0,1fr)}
-html[data-layout="stacked"] .rack{max-width:none}
-
-/* Arena: player panels oppose one another; board and commands form the central axis. */
-html[data-layout="arena"] .app{
---arena-gap:clamp(10px,1vw,18px);
---arena-board:max(380px,min(calc((100dvh - 245px)*var(--board-scale)),calc(100vw - 520px)));
-width:100%;max-width:none;margin:0;gap:var(--arena-gap);align-items:center;
-grid-template-columns:minmax(220px,1fr) var(--arena-board) minmax(220px,1fr);
-grid-template-areas:"p1 board p2" ". toast ." ". controls ." ". utility ."
-}
-html[data-layout="arena"] .side,html[data-layout="arena"] .players{display:contents}
-html[data-layout="arena"] #pn0{grid-area:p1;align-self:center}
-html[data-layout="arena"] #pn1{grid-area:p2;align-self:center}
-html[data-layout="arena"] .boardWrap{grid-area:board}
-html[data-layout="arena"] .board{width:var(--arena-board);max-width:none}
-html[data-layout="arena"] #toast{grid-area:toast}
-html[data-layout="arena"] .ctrls{grid-area:controls}
-html[data-layout="arena"] .histAccess{grid-area:utility;justify-content:center}
-html[data-layout="arena"] .rack{max-width:none}
-
-/* Board-first: commands are directly beneath the board; both players share the full-width lower row. */
-html[data-layout="boardFirst"] .app{
---bf-gap:clamp(8px,.8vw,14px);
---bf-board:max(400px,min(calc((100dvh - 300px)*var(--board-scale)),min(760px,calc(100vw - 32px))));
-width:100%;max-width:none;margin:0;gap:var(--bf-gap);align-items:start;
-grid-template-columns:minmax(0,1fr) calc(var(--bf-board)/2) calc(var(--bf-board)/2) minmax(0,1fr);
-grid-template-areas:". board board ." ". toast toast ." ". controls controls ." "p1 p1 p2 p2" ". utility utility ."
-}
-html[data-layout="boardFirst"] .side,html[data-layout="boardFirst"] .players{display:contents}
-html[data-layout="boardFirst"] .boardWrap{grid-area:board}
-html[data-layout="boardFirst"] .board{width:var(--bf-board);max-width:none}
-html[data-layout="boardFirst"] #toast{grid-area:toast}
-html[data-layout="boardFirst"] .ctrls{grid-area:controls}
-html[data-layout="boardFirst"] #pn0{grid-area:p1}
-html[data-layout="boardFirst"] #pn1{grid-area:p2}
-html[data-layout="boardFirst"] .histAccess{grid-area:utility;justify-content:center}
-html[data-layout="boardFirst"] .rack{max-width:none}
-
-/* Tabletop: one player above and one below the board; commands run beside the play surface. */
-html[data-layout="tabletop"] .app{
---table-gap:clamp(10px,1vw,18px);
---table-tools:clamp(280px,24vw,390px);
---table-board:max(380px,min(calc((100dvh - 245px)*var(--board-scale)),calc(100vw - var(--table-tools) - 40px),760px));
-width:100%;max-width:none;margin:0;gap:var(--table-gap);align-items:center;
-grid-template-columns:minmax(0,1fr) var(--table-tools);
-grid-template-areas:"p1 toast" "board controls" "p2 utility"
-}
-html[data-layout="tabletop"] .side,html[data-layout="tabletop"] .players{display:contents}
-html[data-layout="tabletop"] #pn0{grid-area:p1}
-html[data-layout="tabletop"] #pn1{grid-area:p2}
-html[data-layout="tabletop"] .boardWrap{grid-area:board;justify-self:center}
-html[data-layout="tabletop"] .board{width:var(--table-board);max-width:none}
-html[data-layout="tabletop"] #toast{grid-area:toast}
-html[data-layout="tabletop"] .ctrls{grid-area:controls;align-self:center}
-html[data-layout="tabletop"] .histAccess{grid-area:utility;align-self:start}
-html[data-layout="tabletop"] .rack{max-width:min(720px,calc(100vw - var(--table-tools) - 60px))}
-}
-
-/* Settings grow on wide screens so layout cards and sliders remain readable. */
-@media(min-width:720px){#ad{width:min(94vw,720px)}}
-@media(max-width:560px){.layoutGrid{grid-template-columns:minmax(0,1fr)}.lyOpt{grid-template-columns:70px minmax(0,1fr)}}
-
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}

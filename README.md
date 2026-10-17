@@ -16,10 +16,10 @@ This project evolved from the original repository, [DAXEI08/update-version](http
 - Tile swap
 - **Unlimited pass**: there is no pass or skip limit
 - Human **tahkim** (judging): the challenger rules the last move **✔ صحيح** or **✖ خطأ**
-- Move history with words, scores, bingos, passes, swaps and tahkim verdicts in an optional off-canvas drawer
+- Move history with words, scores, bingos, passes, swaps and tahkim verdicts, with a show/hide toggle (إخفاء السجل / إظهار السجل) that never moves the racks, buttons or board
 - Blank tiles (always worth 0)
-- Five responsive layout presets for desktop, tablet and mobile, portrait and landscape
-- Live interface tuning for board, racks, buttons, button spacing/columns and history sizing
+- Responsive layout for desktop, tablet and mobile, portrait and landscape
+- Adjustable interface dimensions (board, racks, buttons, history)
 
 There is no automatic dictionary: word validity is decided only by the players through tahkim.
 
@@ -47,40 +47,21 @@ Themes only change presentation. They never affect the mode, tile distribution, 
 | Emerald | زمردي | emerald green, cream and gold |
 | Desert | صحراوي | a light theme: sand, terracotta, warm brown, ivory, muted gold |
 
-The selected theme is stored in `localStorage` under `scrabble.theme`. UI layout and sizing are stored together under `scrabble.ui`. Existing `scrabble.dims` data is migrated automatically into the unified UI settings. Resetting UI customization does not reset the theme or the game.
+The selected theme is stored in `localStorage` under `scrabble.theme`. If the value is missing, unreadable, or not a known theme id, the game falls back to Classic. Interface dimensions are stored separately under `scrabble.dims`, so resetting one never affects the other.
 
 ### How themes work
 
 `js/themes.js` only sets `<html data-theme="id">`. All colours are CSS custom properties defined once per theme in `css/themes.css`; there is no per-element styling from JavaScript and no duplicated stylesheet. To add a theme, add a block in `themes.css` that defines every token, and an entry in `THEMES` in `themes.js`.
 
-## Layout presets and UI configuration
+## History toggle
 
-Open **الإعدادات → تخطيط الواجهة** to switch layouts live without restarting the match.
+The history panel has a small button in its corner: **إخفاء السجل** (hide) / **إظهار السجل** (show).
 
-| Preset | Arabic | Desktop intent | Mobile behavior |
-|---|---|---|---|
-| Classic stacked | كلاسيكي عمودي | Restores the original side layout: Player 1 above Player 2, then controls | Same compact vertical hierarchy on narrow screens |
-| Balanced | متوازن | Large board with a flexible player/control side column | Standard board-first vertical flow |
-| Arena | المواجهة | Players on opposite sides of the board; commands on the central axis below it | Controls are prioritized before the player panels |
-| Board first | اللوح أولاً | Board → commands → two player panels side-by-side | Board → commands → players |
-| Tabletop | الطاولة | One player above the board, the other below, commands beside it | Player 1 → board → commands → player 2 |
-
-The presets rearrange the **same live DOM nodes**. They do not duplicate boards, racks, controls, timers or state, so changing layout cannot desynchronize gameplay.
-
-The same settings panel exposes nine live adjustments: board scale, rack surface scale, tile scale, button scale, button spacing, number of control-button columns, history text scale, history drawer height, and history drawer width. Rack surface size and tile size are intentionally independent.
-
-Layout and sizing are persisted as one `scrabble.ui` object. Invalid layout ids fall back to **Balanced**. Older `scrabble.dims` settings are migrated automatically.
-
-## Word history
-
-**سجل الكلمات** is deliberately secondary UI. It no longer owns a permanent grid column.
-
-- It starts closed and never reserves board/layout space.
-- On desktop and landscape it opens as a side drawer; on portrait phones it behaves like a bottom sheet.
-- History keeps recording while closed and its trigger shows the live entry count.
-- New moves never force the drawer open.
-- It closes via its close button, Escape, or an interaction elsewhere in the game.
-- The closed drawer is `inert` and `aria-hidden`; opening moves keyboard focus to its close button and closing restores focus to the trigger.
+- **Strict layout stability.** The panel keeps its exact size, grid area and border width. Hiding only makes its surface and contents invisible (the `history-hidden` class); the element is never removed or `display:none`, and no grid rule changes. The racks, player panels, buttons and board stay exactly where they are in portrait and landscape.
+- **The history keeps recording** while hidden, and shows the latest entries immediately when revealed.
+- The button is a native `<button>` (Enter / Space) with `aria-expanded`; it stays visible and clickable while the content is hidden.
+- The choice is a device preference stored in `localStorage` under `scrabble.historyVisible` (default: visible; a missing, invalid or unreadable value means visible). It is separate from `scrabble.theme` and `scrabble.dims`.
+- Known limit: with the history text set to its maximum (160%) in a very narrow history column in tight landscape layouts, the title can wrap under the button.
 
 ## Technology
 
@@ -111,14 +92,14 @@ js/
   config.js       global constants: board size, durations, premium layout, glyph/label maps, dimension limits
   modes.js        Expanded and Basic tile data, blank alphabets, mode metadata
   themes.js       theme metadata, load/save/apply, theme selector
-  histview.js     optional history drawer behavior and accessibility
+  histview.js     history show/hide toggle and its saved preference
   state.js        game state, tile bag, snapshots (undo / tahkim)
   game.js         turns, placement, submit, undo, swap, pass, game over
   scoring.js      word finding and scoring
   judge.js        tahkim
   ui.js           rendering and dialogs (including mode and duration selection, blank picker)
   input.js        click/tap, keyboard, drag and drop, buttons, dialog flow
-  dims.js         unified layout preset + interface sizing settings
+  dims.js         interface dimension settings
   cover.js        animated cover screen
   main.js         start-up
 
@@ -135,10 +116,8 @@ tests/            dev-only tests (not needed to play; see "Tests")
     serve.mjs     tiny static server used by the tests
     baseline.mjs  regenerates baseline.json
     baseline.json layout measured before the history toggle existed
-    history-toggle.mjs        drawer behavior and layout-stability checks
-    history-toggle-extra.mjs  keyboard, themes, extreme dimensions
-    desktop-fill.mjs          desktop viewport-utilization checks
-    layout-presets.mjs        preset geometry, mobile compatibility, persistence and migration
+    history-toggle.mjs        bounding boxes before/after hide and show in 8 viewports
+    history-toggle-extra.mjs  keyboard, persistence, extreme dimensions, all themes
 
 assets/
   fonts/

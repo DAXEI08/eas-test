@@ -6,47 +6,17 @@ export const DEFAULT_MINUTES = 25;
 export const DEFAULT_MODE = 'expanded';   // id of a profile in modes.js
 export const TOAST_MS = 4000, TICK_MS = 250;
 
-export const DEFAULT_LAYOUT = 'balanced';
-export const LAYOUT_PRESETS = {
-  stacked: {
-    labelAr: 'كلاسيكي عمودي', labelEn: 'Classic stacked',
-    descAr: 'التخطيط القديم: رفّ اللاعب الأول فوق رفّ اللاعب الثاني، والأزرار أسفلهما.',
-    preview: 'stacked'
-  },
-  balanced: {
-    labelAr: 'متوازن', labelEn: 'Balanced',
-    descAr: 'اللوح كبير، واللاعبان والأزرار في عمود جانبي مرن.',
-    preview: 'side'
-  },
-  arena: {
-    labelAr: 'المواجهة', labelEn: 'Arena',
-    descAr: 'اللاعبان على جانبي اللوح، والأزرار في الوسط أسفل اللوح.',
-    preview: 'arena'
-  },
-  boardFirst: {
-    labelAr: 'اللوح أولاً', labelEn: 'Board first',
-    descAr: 'اللوح ثم الأزرار مباشرة، واللاعبان متجاوران في الأسفل.',
-    preview: 'below'
-  },
-  tabletop: {
-    labelAr: 'الطاولة', labelEn: 'Tabletop',
-    descAr: 'ترتيب مواجه: لاعب، ثم اللوح، ثم اللاعب الآخر مع أدوات جانبية.',
-    preview: 'table'
-  }
-};
-
 // Layout dimensions: key -> [min, max, step, default]. This single table drives the slider ranges, the internal
 // clamp and the defaults (dims.js), so the UI and the clamp can never disagree.
 export const DIM_LIMITS = {
   boardScale:         [0.5, 1.5, 0.05, 1],  // board size multiplier
-  rackScale:          [0.6, 1,   0.05, 1],  // visual rack/rail width; does not resize tile slots
-  tileScale:          [0.75,1.25,0.05, 1],  // rack tile visual size, independent from rack surface
+  rackScale:          [0.5, 1,   0.05, 1],  // player racks width multiplier (1 = full panel width; the CSS cannot grow a rack past its panel)
   buttonScale:        [0.6, 1.6, 0.05, 1],  // button height and text size multiplier
   buttonGap:          [0,   24,  1,    6],  // gap between control buttons, px (no slider)
   controlColumns:     [1,   6,   1,    3],  // control buttons per row (no slider)
   historyScale:       [0.6, 1.6, 0.05, 1],  // history text size multiplier
-  historyHeightScale: [0.4, 1.6, 0.05, 1],  // history drawer height multiplier
-  historyWidthScale:  [0.6, 1.6, 0.05, 1]   // history drawer width multiplier on non-phone layouts
+  historyHeightScale: [0.4, 1.6, 0.05, 1],  // history log height multiplier (capped at board height on desktop)
+  historyWidthScale:  [0.6, 1.6, 0.05, 1]   // history column width multiplier, desktop and landscape layouts
 };
 export const DIMENSIONS = Object.fromEntries(Object.entries(DIM_LIMITS).map(([k, l]) => [k, l[3]]));
 
