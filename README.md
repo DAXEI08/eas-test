@@ -67,7 +67,7 @@ Open **الإعدادات → تخطيط الواجهة** to switch layouts live
 
 The presets rearrange the **same live DOM nodes**. They do not duplicate boards, racks, controls, timers or state, so changing layout cannot desynchronize gameplay.
 
-The same settings panel exposes eight live adjustments: board scale, rack scale, button scale, button spacing, number of control-button columns, history text scale, history drawer height, and history drawer width.
+The same settings panel exposes nine live adjustments: board scale, rack surface scale, tile scale, button scale, button spacing, number of control-button columns, history text scale, history drawer height, and history drawer width. Rack surface size and tile size are intentionally independent.
 
 Layout and sizing are persisted as one `scrabble.ui` object. Invalid layout ids fall back to **Balanced**. Older `scrabble.dims` settings are migrated automatically.
 
