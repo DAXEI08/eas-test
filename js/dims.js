@@ -65,11 +65,19 @@ function layoutPreview(kind) {
 }
 
 function syncLayoutButtons() {
-  $('#lyB').innerHTML = Object.entries(LAYOUT_PRESETS).map(([id, p]) =>
-    `<button type="button" class="lyOpt" data-layout="${id}" role="radio" aria-checked="${id === ui.layout}">`
-    + layoutPreview(p.preview)
-    + `<span class="lyCopy"><b>${p.labelAr}</b><small>${p.labelEn}</small><em>${p.descAr}</em></span></button>`
-  ).join('');
+  const host = $('#lyB');
+  if (!host.children.length) {
+    host.innerHTML = Object.entries(LAYOUT_PRESETS).map(([id, p]) =>
+      `<button type="button" class="lyOpt" data-layout="${id}" role="radio">`
+      + layoutPreview(p.preview)
+      + `<span class="lyCopy"><b>${p.labelAr}</b><small>${p.labelEn}</small><em>${p.descAr}</em></span></button>`
+    ).join('');
+  }
+  host.querySelectorAll('[data-layout]').forEach(b => {
+    const on = b.dataset.layout === ui.layout;
+    b.setAttribute('aria-checked', String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
 }
 
 export function syncDimRows() {
@@ -98,7 +106,8 @@ export function initDims() {
     if (i < 0) return;
     e.preventDefault();
     const delta = e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1;
-    buttons[(i + delta + buttons.length) % buttons.length].focus();
+    const next = buttons[(i + delta + buttons.length) % buttons.length];
+    next.focus(); next.click();
   });
 
   $('#dmB').addEventListener('input', e => {
