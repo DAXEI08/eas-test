@@ -29,9 +29,19 @@
 <button class="btn wide" id="bJudge">تحكيم</button>
 <button class="btn wide" id="bSettings">الإعدادات</button>
 </div>
+<div class="histAccess">
+<button type="button" class="histToggle" id="hToggle" aria-controls="hist" aria-expanded="false">
+<span>سجل الكلمات</span><span class="histCount" id="hCount" aria-label="عدد الحركات">0</span>
+</button>
+</div>
 </section>
-<aside class="hist" id="hist" aria-label="سجل الكلمات"><button type="button" class="histToggle" id="hToggle" aria-controls="hList" aria-expanded="true">إخفاء السجل</button><h2>سجل الكلمات</h2><ol class="hl" id="hList"></ol><p class="hbest" id="hBest"></p></aside>
 </main>
+<aside class="hist" id="hist" aria-labelledby="hTitle" aria-hidden="true" inert>
+<div class="histPanel">
+<div class="histHead"><h2 id="hTitle">سجل الكلمات</h2><button type="button" class="histClose" id="hClose" aria-label="إغلاق سجل الكلمات">×</button></div>
+<ol class="hl" id="hList"></ol><p class="hbest" id="hBest"></p>
+</div>
+</aside>
 <dialog id="dlg" aria-labelledby="dT"><h2 id="dT" tabindex="-1" autofocus></h2><p id="dM"></p><form method="dialog" id="dF"></form></dialog>
 <dialog id="md" aria-labelledby="mT"><h2 id="mT" tabindex="-1" autofocus>اختر نمط الحروف</h2><form method="dialog" id="mf"></form><form method="dialog" class="dlgRow"><button class="btn" id="mCancel" value="">إلغاء</button></form></dialog>
 <dialog id="sd" aria-labelledby="sT"><h2 id="sT" tabindex="-1" autofocus>مدة اللعبة</h2><p>الوقت لكل لاعب — تبدأ الساعة بعد أول حركة.</p><form method="dialog" id="sf"></form><form method="dialog" class="dlgRow"><button class="btn" value="back">رجوع</button></form></dialog>
