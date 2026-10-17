@@ -3,7 +3,7 @@ import { spawn } from 'child_process'; import path from 'path'; import { fileURL
 import { serve } from './layout/serve.mjs';
 const here = path.dirname(fileURLToPath(import.meta.url)), root = path.resolve(here, '..');
 const { srv, base } = await serve(root);
-const runs = [['python3', ['contrast.py']], ['node', ['logic/engine.mjs']], ['node', ['logic/startup.mjs']],
+const runs = [['python3', ['contrast.py']], ['node', ['logic/engine.mjs']], ['node', ['logic/startup.mjs']], ['node', ['layout/desktop-fill.mjs']], ['node', ['layout/layout-presets.mjs']],
   ['node', ['layout/history-toggle.mjs']], ['node', ['layout/history-toggle-extra.mjs', 'a']], ['node', ['layout/history-toggle-extra.mjs', 'b']]];
 // Optional filter: `node run-all.mjs "extra.mjs b"` runs only the suites whose command line contains that text.
 const only = process.argv[2];
