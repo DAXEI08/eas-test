@@ -6,6 +6,30 @@ export const DEFAULT_MINUTES = 25;
 export const DEFAULT_MODE = 'expanded';   // id of a profile in modes.js
 export const TOAST_MS = 4000, TICK_MS = 250;
 
+export const DEFAULT_LAYOUT = 'balanced';
+export const LAYOUT_PRESETS = {
+  balanced: {
+    labelAr: 'متوازن', labelEn: 'Balanced',
+    descAr: 'اللوح كبير، واللاعبان والأزرار في عمود جانبي مرن.',
+    preview: 'side'
+  },
+  arena: {
+    labelAr: 'المواجهة', labelEn: 'Arena',
+    descAr: 'اللاعبان على جانبي اللوح، والأزرار في الوسط أسفل اللوح.',
+    preview: 'arena'
+  },
+  boardFirst: {
+    labelAr: 'اللوح أولاً', labelEn: 'Board first',
+    descAr: 'اللوح ثم الأزرار مباشرة، واللاعبان متجاوران في الأسفل.',
+    preview: 'below'
+  },
+  tabletop: {
+    labelAr: 'الطاولة', labelEn: 'Tabletop',
+    descAr: 'ترتيب مواجه: لاعب، ثم اللوح، ثم اللاعب الآخر مع أدوات جانبية.',
+    preview: 'table'
+  }
+};
+
 // Layout dimensions: key -> [min, max, step, default]. This single table drives the slider ranges, the internal
 // clamp and the defaults (dims.js), so the UI and the clamp can never disagree.
 export const DIM_LIMITS = {
