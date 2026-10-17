@@ -196,4 +196,122 @@ background:var(--dialog-bg);color:var(--text-main);border:2px solid var(--dialog
 .thOpt[aria-pressed="true"]{outline:3px solid #000;outline-offset:2px;box-shadow:0 0 0 7px #fff}
 .thOpt[aria-pressed="true"]::after{content:"✓";position:absolute;top:6px;inset-inline-end:10px;font-size:1.1rem;line-height:1}
 .thOpt:focus-visible{outline:3px dashed #000;outline-offset:2px;box-shadow:0 0 0 7px #fff}
+
+/* Layout preset selector */
+.layoutGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.lyOpt{position:relative;display:grid;grid-template-columns:76px minmax(0,1fr);gap:9px;align-items:center;min-height:92px;padding:9px;border-radius:11px;cursor:pointer;
+font-family:var(--font);text-align:start;color:var(--text-main);background:var(--surface-inset);border:2px solid var(--panel-line)}
+.lyOpt[aria-checked="true"]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.lyOpt[aria-checked="true"]::after{content:"✓";position:absolute;top:5px;inset-inline-end:8px;color:var(--accent-text);font-weight:700}
+.lyOpt:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.lyCopy{display:grid;line-height:1.25}.lyCopy b{font-size:.98rem}.lyCopy small{direction:ltr;text-align:start;opacity:.72}.lyCopy em{margin-top:3px;font-size:.76rem;font-style:normal;font-weight:400;line-height:1.35;opacity:.82}
+.lyPreview{position:relative;display:block;width:76px;height:58px;border-radius:7px;background:var(--dialog-bg);border:1px solid var(--dialog-line);direction:ltr}
+.lyPreview i{position:absolute;display:block;border-radius:3px}
+.lyPreview .lyBoard{background:var(--board-1);border:1px solid var(--board-line)}
+.lyPreview .lyP1,.lyPreview .lyP2{background:var(--panel-bg);border:1px solid var(--player-1)}
+.lyPreview .lyP2{border-color:var(--player-2)}
+.lyPreview .lyCtrl{background:var(--btn-main-1);border:1px solid var(--btn-line)}
+.lyPreview.side .lyBoard{left:30px;top:5px;width:41px;height:41px}.lyPreview.side .lyP1{left:5px;top:7px;width:20px;height:15px}.lyPreview.side .lyP2{left:5px;top:26px;width:20px;height:15px}.lyPreview.side .lyCtrl{left:5px;top:45px;width:20px;height:7px}
+.lyPreview.arena .lyBoard{left:25px;top:7px;width:27px;height:27px}.lyPreview.arena .lyP1{left:4px;top:9px;width:16px;height:24px}.lyPreview.arena .lyP2{right:4px;top:9px;width:16px;height:24px}.lyPreview.arena .lyCtrl{left:25px;top:39px;width:27px;height:10px}
+.lyPreview.below .lyBoard{left:25px;top:3px;width:27px;height:27px}.lyPreview.below .lyCtrl{left:25px;top:33px;width:27px;height:7px}.lyPreview.below .lyP1{left:12px;top:44px;width:24px;height:9px}.lyPreview.below .lyP2{right:12px;top:44px;width:24px;height:9px}
+.lyPreview.table .lyBoard{left:17px;top:17px;width:34px;height:25px}.lyPreview.table .lyP1{left:17px;top:4px;width:34px;height:9px}.lyPreview.table .lyP2{left:17px;bottom:3px;width:34px;height:9px}.lyPreview.table .lyCtrl{right:4px;top:10px;width:10px;height:38px}
+.setActions{display:grid}
+
+/* Mobile preset behavior: presets preserve their intent but collapse to touch-friendly one-column flows. */
+@media(max-width:999px){
+html[data-layout="arena"] .side .ctrls,
+html[data-layout="boardFirst"] .side .ctrls{order:2}
+html[data-layout="arena"] .side .players,
+html[data-layout="boardFirst"] .side .players{order:3}
+html[data-layout="arena"] .side #toast,
+html[data-layout="boardFirst"] .side #toast{order:1}
+html[data-layout="arena"] .side .histAccess,
+html[data-layout="boardFirst"] .side .histAccess{order:4}
+}
+@media(max-width:719px) and (orientation:portrait){
+html[data-layout="tabletop"] .app{grid-template-columns:minmax(0,1fr);grid-template-areas:"toast" "p1" "board" "ctrls" "p2" "utility"}
+html[data-layout="tabletop"] .side,html[data-layout="tabletop"] .players{display:contents}
+html[data-layout="tabletop"] #toast{grid-area:toast}
+html[data-layout="tabletop"] #pn0{grid-area:p1}
+html[data-layout="tabletop"] .boardWrap{grid-area:board}
+html[data-layout="tabletop"] .ctrls{grid-area:ctrls}
+html[data-layout="tabletop"] #pn1{grid-area:p2}
+html[data-layout="tabletop"] .histAccess{grid-area:utility}
+}
+
+/* Desktop preset engine. Balanced keeps wrappers intact. The other presets flatten only presentational
+   wrappers, allowing the same live board/racks/buttons to be rearranged without cloning DOM or state. */
+@media(min-width:1000px) and (min-height:560px){
+html[data-layout="balanced"] .app,
+html:not([data-layout]) .app{
+--desk-gap:clamp(10px,1vw,18px);
+--desk-board:max(420px,min(calc((100dvh - 60px)*var(--board-scale)),calc(100vw - 16px - var(--desk-gap) - 360px)));
+width:100%;max-width:none;margin:0;align-items:start;justify-content:stretch;gap:var(--desk-gap);
+grid-template-columns:minmax(340px,1fr) var(--desk-board);grid-template-areas:"side board"
+}
+html[data-layout="balanced"] .boardWrap,html:not([data-layout]) .boardWrap{grid-area:board}
+html[data-layout="balanced"] .board,html:not([data-layout]) .board{width:var(--desk-board)}
+html[data-layout="balanced"] .side,html:not([data-layout]) .side{grid-area:side;display:grid}
+html[data-layout="balanced"] .players,html:not([data-layout]) .players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* Arena: player panels oppose one another; board and commands form the central axis. */
+html[data-layout="arena"] .app{
+--arena-gap:clamp(10px,1vw,18px);
+--arena-board:max(380px,min(calc((100dvh - 245px)*var(--board-scale)),calc(100vw - 520px)));
+width:100%;max-width:none;margin:0;gap:var(--arena-gap);align-items:center;
+grid-template-columns:minmax(220px,1fr) var(--arena-board) minmax(220px,1fr);
+grid-template-areas:"p1 board p2" ". toast ." ". controls ." ". utility ."
+}
+html[data-layout="arena"] .side,html[data-layout="arena"] .players{display:contents}
+html[data-layout="arena"] #pn0{grid-area:p1;align-self:center}
+html[data-layout="arena"] #pn1{grid-area:p2;align-self:center}
+html[data-layout="arena"] .boardWrap{grid-area:board}
+html[data-layout="arena"] .board{width:var(--arena-board);max-width:none}
+html[data-layout="arena"] #toast{grid-area:toast}
+html[data-layout="arena"] .ctrls{grid-area:controls}
+html[data-layout="arena"] .histAccess{grid-area:utility;justify-content:center}
+html[data-layout="arena"] .rack{max-width:none}
+
+/* Board-first: commands are directly beneath the board; both players share the full-width lower row. */
+html[data-layout="boardFirst"] .app{
+--bf-gap:clamp(8px,.8vw,14px);
+--bf-board:max(400px,min(calc((100dvh - 300px)*var(--board-scale)),min(760px,calc(100vw - 32px))));
+width:100%;max-width:none;margin:0;gap:var(--bf-gap);align-items:start;
+grid-template-columns:minmax(0,1fr) calc(var(--bf-board)/2) calc(var(--bf-board)/2) minmax(0,1fr);
+grid-template-areas:". board board ." ". toast toast ." ". controls controls ." "p1 p1 p2 p2" ". utility utility ."
+}
+html[data-layout="boardFirst"] .side,html[data-layout="boardFirst"] .players{display:contents}
+html[data-layout="boardFirst"] .boardWrap{grid-area:board}
+html[data-layout="boardFirst"] .board{width:var(--bf-board);max-width:none}
+html[data-layout="boardFirst"] #toast{grid-area:toast}
+html[data-layout="boardFirst"] .ctrls{grid-area:controls}
+html[data-layout="boardFirst"] #pn0{grid-area:p1}
+html[data-layout="boardFirst"] #pn1{grid-area:p2}
+html[data-layout="boardFirst"] .histAccess{grid-area:utility;justify-content:center}
+html[data-layout="boardFirst"] .rack{max-width:none}
+
+/* Tabletop: one player above and one below the board; commands run beside the play surface. */
+html[data-layout="tabletop"] .app{
+--table-gap:clamp(10px,1vw,18px);
+--table-tools:clamp(280px,24vw,390px);
+--table-board:max(380px,min(calc((100dvh - 245px)*var(--board-scale)),calc(100vw - var(--table-tools) - 40px),760px));
+width:100%;max-width:none;margin:0;gap:var(--table-gap);align-items:center;
+grid-template-columns:minmax(0,1fr) var(--table-tools);
+grid-template-areas:"p1 toast" "board controls" "p2 utility"
+}
+html[data-layout="tabletop"] .side,html[data-layout="tabletop"] .players{display:contents}
+html[data-layout="tabletop"] #pn0{grid-area:p1}
+html[data-layout="tabletop"] #pn1{grid-area:p2}
+html[data-layout="tabletop"] .boardWrap{grid-area:board;justify-self:center}
+html[data-layout="tabletop"] .board{width:var(--table-board);max-width:none}
+html[data-layout="tabletop"] #toast{grid-area:toast}
+html[data-layout="tabletop"] .ctrls{grid-area:controls;align-self:center}
+html[data-layout="tabletop"] .histAccess{grid-area:utility;align-self:start}
+html[data-layout="tabletop"] .rack{max-width:min(720px,calc(100vw - var(--table-tools) - 60px))}
+}
+
+/* Settings grow on wide screens so layout cards and sliders remain readable. */
+@media(min-width:720px){#ad{width:min(94vw,720px)}}
+@media(max-width:560px){.layoutGrid{grid-template-columns:minmax(0,1fr)}.lyOpt{grid-template-columns:70px minmax(0,1fr)}}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
