@@ -8,8 +8,7 @@ const LEGACY_DIMS_KEY = 'scrabble.dims';
 
 const FIELDS = [
   ['boardScale', 'حجم اللوح'],
-  ['rackScale', 'حجم الرف'],
-  ['tileScale', 'حجم القطع'],
+  ['rackScale', 'حجم الأرفف'],
   ['buttonScale', 'حجم الأزرار'],
   ['buttonGap', 'المسافة بين الأزرار', 'px'],
   ['controlColumns', 'عدد أعمدة الأزرار', 'int'],
@@ -53,7 +52,6 @@ export function applyUIConfig() {
   r.dataset.layout = validLayout(ui.layout);
   s.setProperty('--board-scale', clamp('boardScale', d.boardScale));
   s.setProperty('--rack-scale', clamp('rackScale', d.rackScale));
-  s.setProperty('--tile-scale', clamp('tileScale', d.tileScale));
   s.setProperty('--btn-scale', clamp('buttonScale', d.buttonScale));
   s.setProperty('--btn-gap', clamp('buttonGap', d.buttonGap) + 'px');
   s.setProperty('--ctrl-cols', Math.round(clamp('controlColumns', d.controlColumns)));

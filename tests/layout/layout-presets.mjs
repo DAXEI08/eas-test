@@ -3,7 +3,7 @@ import { launch, openGame, closeGame } from './lib.mjs';
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.log('  FAIL:', m); } };
 const b = await launch();
-const presets = ['balanced', 'arena', 'boardFirst', 'tabletop'];
+const presets = ['stacked', 'balanced', 'arena', 'boardFirst', 'tabletop'];
 const cases = {
   desktop: { width: 1366, height: 768, deviceScaleFactor: 1 },
   phonePortrait: { width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
@@ -31,6 +31,11 @@ for (const [device, vp] of Object.entries(cases)) {
     ok(g.sw <= g.vw + 2, `no horizontal overflow: ${g.sw}/${g.vw}`);
     ok(errors.length === 0, 'no page errors: ' + errors.join('; '));
 
+    if (device === 'desktop' && layout === 'stacked') {
+      ok(g.panels[0].bottom <= g.panels[1].y + 2, 'stacked puts player 1 above player 2');
+      ok(Math.abs(g.panels[0].x - g.panels[1].x) < 2 && Math.abs(g.panels[0].w - g.panels[1].w) < 2, 'stacked keeps both player panels in one column');
+      ok(g.controls.y >= g.panels[1].bottom - 2, 'stacked puts controls below both player panels');
+    }
     if (device === 'desktop' && layout === 'arena') {
       const left = g.panels.some(p => p.right <= g.board.x + 2), right = g.panels.some(p => p.x >= g.board.right - 2);
       ok(left && right, 'arena places players on opposite sides of board');
@@ -63,7 +68,7 @@ console.log('\n# settings + migration');
 
   await page.click('#bSettings');
   await page.waitForSelector('#ad[open]');
-  ok(await page.$$eval('#lyB .lyOpt', n => n.length) === 4, 'settings exposes four layout presets');
+  ok(await page.$eval('#lyB .lyOpt', n => n.length) === 5, 'settings exposes five layout presets');
   ok(await page.$eval('#dmB .setRange', n => n.length) === 9, 'settings exposes all nine sizing/spacing controls');
   // Rack scale must change only the visual rack rail, not slot/tile geometry.
   const rackBefore = await page.$eval('#rk0', e => ({

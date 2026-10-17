@@ -29,7 +29,7 @@ ok(d.querySelector('#ad').open, 'settings opens');
 const heads = [...d.querySelectorAll('#ad .setH')].map(h => h.textContent);
 ok(heads.join() === 'المظهر,تخطيط الواجهة,الحجم والمسافات', 'settings sections: ' + heads);
 ok(d.querySelectorAll('#thB .thOpt').length === 4, '4 theme options');
-ok(d.querySelectorAll('#lyB .lyOpt').length === 4, '4 layout presets');
+ok(d.querySelectorAll('#lyB .lyOpt').length === 5, '5 layout presets');
 ok(d.querySelectorAll('#dmB input[type=range]').length === 9, '9 size/spacing sliders');
 ok(!/صوت|موسيقى|كتم|مؤثرات/.test(d.querySelector('#ad').textContent), 'no audio text in settings');
 const { S } = await import(`${ROOT}/js/state.js`);
