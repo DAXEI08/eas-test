@@ -45,6 +45,6 @@ export function initHistoryToggle() {
   // the original pointer interaction intact, so the game still feels immediate.
   document.addEventListener('pointerdown', e => {
     if (!isHistoryOpen() || hist.contains(e.target) || toggle.contains(e.target)) return;
-    setHistoryOpen(false, false);
+    setHistoryOpen(false);
   });
 }
