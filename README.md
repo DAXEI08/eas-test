@@ -18,7 +18,7 @@ This project evolved from the original repository, [DAXEI08/update-version](http
 - Human **tahkim** (judging): the challenger rules the last move **✔ صحيح** or **✖ خطأ**
 - Move history with words, scores, bingos, passes, swaps and tahkim verdicts in an optional off-canvas drawer
 - Blank tiles (always worth 0)
-- Four responsive layout presets for desktop, tablet and mobile, portrait and landscape
+- Five responsive layout presets for desktop, tablet and mobile, portrait and landscape
 - Live interface tuning for board, racks, buttons, button spacing/columns and history sizing
 
 There is no automatic dictionary: word validity is decided only by the players through tahkim.
@@ -59,6 +59,7 @@ Open **الإعدادات → تخطيط الواجهة** to switch layouts live
 
 | Preset | Arabic | Desktop intent | Mobile behavior |
 |---|---|---|---|
+| Classic stacked | كلاسيكي عمودي | Restores the original side layout: Player 1 above Player 2, then controls | Same compact vertical hierarchy on narrow screens |
 | Balanced | متوازن | Large board with a flexible player/control side column | Standard board-first vertical flow |
 | Arena | المواجهة | Players on opposite sides of the board; commands on the central axis below it | Controls are prioritized before the player panels |
 | Board first | اللوح أولاً | Board → commands → two player panels side-by-side | Board → commands → players |
