@@ -136,7 +136,7 @@ grid-template-columns:minmax(270px,var(--sw)) var(--bs);grid-template-areas:"hea
 .board{width:var(--bs);max-width:none}
 .players{grid-template-columns:minmax(0,1fr)}
 }
-/* Tilted phones / short or narrow landscape screens: the board stays pinned on the left at full height, players + buttons sit beside it and the history follows below. */
+/* Tilted phones / short or narrow landscape screens: the board stays pinned at full height with players + buttons beside it. */
 @media(orientation:landscape) and (max-width:999px),(orientation:landscape) and (max-height:559px){
 body{padding-inline:max(8px,env(safe-area-inset-left)) max(8px,env(safe-area-inset-right))}
 .app{--lb:max(220px,min(calc((100dvh - 60px)*var(--board-scale)),calc(100vw - 386px),calc(880px*var(--board-scale))));max-width:none;align-items:start;column-gap:10px;
