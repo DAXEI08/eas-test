@@ -39,7 +39,8 @@ export const LAYOUT_PRESETS = {
 // clamp and the defaults (dims.js), so the UI and the clamp can never disagree.
 export const DIM_LIMITS = {
   boardScale:         [0.5, 1.5, 0.05, 1],  // board size multiplier
-  rackScale:          [0.5, 1,   0.05, 1],  // player racks width multiplier (1 = full panel width; the CSS cannot grow a rack past its panel)
+  rackScale:          [0.6, 1,   0.05, 1],  // visual rack/rail width; does not resize tile slots
+  tileScale:          [0.75,1.25,0.05, 1],  // rack tile visual size, independent from rack surface
   buttonScale:        [0.6, 1.6, 0.05, 1],  // button height and text size multiplier
   buttonGap:          [0,   24,  1,    6],  // gap between control buttons, px (no slider)
   controlColumns:     [1,   6,   1,    3],  // control buttons per row (no slider)
