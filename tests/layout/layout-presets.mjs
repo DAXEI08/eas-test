@@ -64,7 +64,28 @@ console.log('\n# settings + migration');
   await page.click('#bSettings');
   await page.waitForSelector('#ad[open]');
   ok(await page.$$eval('#lyB .lyOpt', n => n.length) === 4, 'settings exposes four layout presets');
-  ok(await page.$$eval('#dmB .setRange', n => n.length) === 8, 'settings exposes all eight sizing/spacing controls');
+  ok(await page.$eval('#dmB .setRange', n => n.length) === 9, 'settings exposes all nine sizing/spacing controls');
+  // Rack scale must change only the visual rack rail, not slot/tile geometry.
+  const rackBefore = await page.$eval('#rk0', e => ({
+    rack: e.getBoundingClientRect().width,
+    slot: e.querySelector('.slot').getBoundingClientRect().width,
+    rail: getComputedStyle(e, '::before').transform
+  }));
+  await page.$eval('#dm_rackScale', e => { e.value = '0.6'; e.dispatchEvent(new Event('input', { bubbles:true })); });
+  const rackAfter = await page.$eval('#rk0', e => ({
+    rack: e.getBoundingClientRect().width,
+    slot: e.querySelector('.slot').getBoundingClientRect().width,
+    rail: getComputedStyle(e, '::before').transform
+  }));
+  ok(Math.abs(rackBefore.rack - rackAfter.rack) < .5 && Math.abs(rackBefore.slot - rackAfter.slot) < .5,
+    `rack scale leaves rack/slot geometry stable: ${JSON.stringify({rackBefore,rackAfter})}`);
+  ok(rackBefore.rail !== rackAfter.rail, 'rack scale changes the rack rail surface');
+
+  const tileBefore = await page.$eval('#rk0 .slot', e => e.getBoundingClientRect().width);
+  await page.$eval('#dm_tileScale', e => { e.value = '0.8'; e.dispatchEvent(new Event('input', { bubbles:true })); });
+  const tileAfter = await page.$eval('#rk0 .slot', e => e.getBoundingClientRect().width);
+  ok(tileAfter < tileBefore * .9, `tile scale independently changes tile/slot visual size: ${tileBefore} -> ${tileAfter}`);
+
   await page.click('#lyB [data-layout="arena"]');
   const saved = await page.evaluate(() => ({ d:document.documentElement.dataset.layout, u:JSON.parse(localStorage.getItem('scrabble.ui')) }));
   ok(saved.d === 'arena' && saved.u.layout === 'arena', 'layout changes live and persists');
